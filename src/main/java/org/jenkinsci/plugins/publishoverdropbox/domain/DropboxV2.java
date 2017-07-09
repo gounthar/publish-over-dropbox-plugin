@@ -40,7 +40,6 @@ import org.jenkinsci.plugins.publishoverdropbox.impl.Messages;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -103,6 +102,7 @@ public class DropboxV2 implements DropboxAdapter {
      *
      * @param timeout timeout in miliseconds
      */
+    @Override
     public void setTimeout(int timeout) {
         if (timeout >= 1000) {
             this.timeout = timeout;
@@ -111,21 +111,25 @@ public class DropboxV2 implements DropboxAdapter {
         }
     }
 
+    @Override
     public int getTimeout() {
         return timeout;
     }
 
-    public boolean connect() throws IOException {
+    @Override
+    public boolean connect() throws RestException {
         userInfo = retrieveAccountInfo();
 
         return isConnected();
     }
 
+    @Override
     public boolean isConnected() {
         return !StringUtils.isEmpty(accessToken) && userInfo != null && !userInfo.isDisabled();
     }
 
-    public boolean disconnect() throws IOException {
+    @Override
+    public boolean disconnect() {
         userInfo = null;
         return true;
     }
@@ -134,9 +138,14 @@ public class DropboxV2 implements DropboxAdapter {
         URL url = getUrl(URL_ACCOUNT_INFO);
         JsonObjectRequest<AccountInfo> request = requestForPostUrlClassResponse(url, AccountInfo.class);
 
-        return request.execute();
+        try {
+            return request.execute();
+        } catch (IOException e) {
+            throw new RestException(Messages.exception_rest_connection(), e);
+        }
     }
 
+    @Override
     public boolean changeWorkingDirectory(@Nonnull String relativePath) throws RestException {
         boolean hasSuccess = true;
         try {
@@ -146,12 +155,13 @@ public class DropboxV2 implements DropboxAdapter {
                     workingFolder = (FolderMetadata) metadata;
                 }
             }
-        } catch (IOException e) {
+        } catch (RestException e) {
             hasSuccess = false;
         }
         return hasSuccess && workingFolder != null && workingFolder.isDir();
     }
 
+    @Override
     public FolderMetadata makeDirectory(@Nonnull String path) throws RestException {
         URL url = getUrl(URL_CREATE_FOLDER);
         FolderMetadata folder = null;
@@ -180,7 +190,7 @@ public class DropboxV2 implements DropboxAdapter {
         return folder;
     }
 
-
+    @Override
     public void cleanWorkingFolder() throws RestException {
         if (workingFolder.isDir()) {
             FolderContent contents = listFilesOfFolder(workingFolder);
@@ -214,12 +224,17 @@ public class DropboxV2 implements DropboxAdapter {
         requestContent.setPath(absolute);
         if (StringUtils.isNotEmpty(path) && !"/".equals(path)) {
             JsonObjectRequest<Metadata> request = requestPostRequestResponse(url, requestContent, Metadata.class);
-            request.execute();
+            try {
+                request.execute();
+            } catch (IOException e) {
+                throw new RestException(Messages.exception_dropbox_folder_delete(path), e);
+            }
         } else {
             throw new RestException(Messages.exception_dropbox_folder_delete(path));
         }
     }
 
+    @Override
     public void pruneFolder(@Nonnull String path, int pruneRootDays) throws RestException {
         Date cutoff = new Date(System.currentTimeMillis() - pruneRootDays * MILLISECONDS_PER_DAY);
         String absolute = createAbsolutePath(path);
@@ -241,7 +256,7 @@ public class DropboxV2 implements DropboxAdapter {
         while (contents.hasMore() && cursor != null);
     }
 
-    public boolean isEntryModifiedSince(@Nonnull Metadata metadata, @Nonnull Date cutoff) throws RestException {
+    private boolean isEntryModifiedSince(@Nonnull Metadata metadata, @Nonnull Date cutoff) throws RestException {
         boolean isModifiedSince = false;
         if (metadata instanceof FileMetadata) {
             Date lastModified = parseDate(((FileMetadata) metadata).getServerModified());
@@ -297,6 +312,8 @@ public class DropboxV2 implements DropboxAdapter {
      * @param content data stream of the content
      * @param length  content size in bytes
      */
+
+    @Override
     public void storeFile(@Nonnull String name, @Nonnull InputStream content, long length) throws RestException {
         if (length <= chunkSize) {
             singleStore(name, content, length);
@@ -332,7 +349,12 @@ public class DropboxV2 implements DropboxAdapter {
         chunkStream = new ChunkedInputStream(content, chunkSize);
         SessionStart startContent = new SessionStart();
         JsonObjectRequest<Session> startRequest = requestForUpload(startUrl, startContent, Session.class, chunkStream, chunkSize);
-        Session session = startRequest.execute();
+        Session session;
+        try {
+            session = startRequest.execute();
+        } catch (IOException e) {
+            throw new RestException(Messages.exception_store_chunk_end(name), e);
+        }
         offSet += chunkSize;
 
         while (length - offSet > chunkSize) {
@@ -343,7 +365,11 @@ public class DropboxV2 implements DropboxAdapter {
             appendContent.cursor.setOffset(offSet);
             appendContent.cursor.setSessionId(session.getSessionId());
             JsonObjectRequest<ErrorResponse> appendRequest = requestForUpload(appendUrl, appendContent, ErrorResponse.class, chunkStream, chunkSize);
-            appendRequest.execute();
+            try {
+                appendRequest.execute();
+            } catch (IOException e) {
+                throw new RestException(Messages.exception_store_chunk_continue(name), e);
+            }
             offSet += chunkSize;
         }
         // Commit uploader
@@ -354,7 +380,11 @@ public class DropboxV2 implements DropboxAdapter {
         finishContent.cursor.setOffset(offSet);
         finishContent.commit.setPath(createPath(name));
         JsonObjectRequest<FileMetadata> finishRequest = requestForUpload(finishUrl, finishContent, FileMetadata.class, chunkStream, length - offSet);
-        finishRequest.execute();
+        try {
+            finishRequest.execute();
+        } catch (IOException e) {
+            throw new RestException(Messages.exception_store_chunk_end(name), e);
+        }
     }
 
     @VisibleForTesting
@@ -414,7 +444,7 @@ public class DropboxV2 implements DropboxAdapter {
     }
 
     private <T> JsonObjectRequest<T> requestForPostUrlClassResponse(URL url, Class<T> classOfT) {
-        JsonObjectRequest.Builder<T> builder = new JsonObjectRequest.Builder<T>();
+        JsonObjectRequest.Builder<T> builder = new JsonObjectRequest.Builder<>();
         builder.url(url)
                 .gson(gson)
                 .method(POST)
@@ -428,7 +458,7 @@ public class DropboxV2 implements DropboxAdapter {
 
     private <T> JsonObjectRequest<T> requestPostRequestResponse(URL url, Object requestContent, Class<T> classOfT) {
         String content = gson.toJson(requestContent);
-        JsonObjectRequest.Builder<T> builder = new JsonObjectRequest.Builder<T>();
+        JsonObjectRequest.Builder<T> builder = new JsonObjectRequest.Builder<>();
         builder.url(url)
                 .gson(gson)
                 .method(POST)
@@ -461,9 +491,7 @@ public class DropboxV2 implements DropboxAdapter {
         URL url;
         try {
             url = new URLBuilder(urlSource).build();
-        } catch (URISyntaxException e) {
-            throw new RestException(Messages.exception_dropbox_url(), e);
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException | MalformedURLException e) {
             throw new RestException(Messages.exception_dropbox_url(), e);
         }
 
@@ -504,7 +532,7 @@ public class DropboxV2 implements DropboxAdapter {
      * Static token helpers
      * */
 
-    public static String convertAuthorizationToAccessCode(String authorizationCode) throws IOException {
+    public static String convertAuthorizationToAccessCode(String authorizationCode) throws RestException {
         if (StringUtils.isEmpty(authorizationCode)) {
             return "";
         }
@@ -516,7 +544,7 @@ public class DropboxV2 implements DropboxAdapter {
         return accessToken;
     }
 
-    private static String readAccessTokenFromWeb(String authorizationCode) throws RestException, UnsupportedEncodingException {
+    private static String readAccessTokenFromWeb(String authorizationCode) throws RestException {
         String accessToken;
         URL url = getUrl(URL_TOKEN);
         FormBuilder formBuilder = new FormBuilder()
@@ -529,18 +557,23 @@ public class DropboxV2 implements DropboxAdapter {
             Class[] argClass = {formBuilder.getClass()};
             Method method = privateConfig.getDeclaredMethod("a", argClass);
             method.invoke(null, formBuilder);
-        } catch (InvocationTargetException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException e) {
+        } catch (InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IllegalAccessException e) {
             // Apply local development parameters
             formBuilder.appendQueryParameter("client_secret", Config.CLIENT_SECRET);
         }
-        JsonObjectRequest<TokenResponse> request = new JsonObjectRequest.Builder<TokenResponse>()
-                .gson(new Gson())
-                .responseClass(TokenResponse.class)
-                .url(url)
-                .upload(formBuilder.build(), FormBuilder.CONTENT_TYPE)
-                .responseErrorClass(ErrorResponse.class)
-                .build();
-        TokenResponse response = request.execute();
+        TokenResponse response;
+        try {
+            JsonObjectRequest<TokenResponse> request = new JsonObjectRequest.Builder<TokenResponse>()
+                    .gson(new Gson())
+                    .responseClass(TokenResponse.class)
+                    .url(url)
+                    .upload(formBuilder.build(), FormBuilder.CONTENT_TYPE)
+                    .responseErrorClass(ErrorResponse.class)
+                    .build();
+            response = request.execute();
+        } catch (IOException e) {
+            throw new RestException(Messages.exception_accesstokens(), e);
+        }
         accessToken = response.getAccessToken();
 
         return accessToken;

@@ -27,7 +27,6 @@ package org.jenkinsci.plugins.publishoverdropbox.domain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.publishoverdropbox.domain.model.RestException;
 import org.jenkinsci.plugins.publishoverdropbox.impl.Messages;
 
 import javax.annotation.Nonnull;
@@ -37,7 +36,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JsonObjectRequest<T> {
+class JsonObjectRequest<T> {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String UTF_8 = "UTF-8";
@@ -53,13 +52,13 @@ public class JsonObjectRequest<T> {
     private Class<T> classOfT;
     private String bearerToken;
     private int timeout = TIMEOUT_30_SECONDS;
-    private Map<String, String> headers = new HashMap<String, String>();
+    private Map<String, String> headers = new HashMap<>();
     private Class classOfError;
     private Method method = Method.GET;
 
     enum Method {POST, GET, PUT, DELETE}
 
-    public static class Builder<T> {
+    static class Builder<T> {
         JsonObjectRequest<T> request;
 
         public Builder() {
@@ -134,7 +133,7 @@ public class JsonObjectRequest<T> {
     private JsonObjectRequest() {
     }
 
-    public T execute() throws RestException {
+    public T execute() throws IOException {
         T model = null;
         HttpURLConnection connection;
         InputStream inputStream = null;
@@ -145,7 +144,9 @@ public class JsonObjectRequest<T> {
             connection.setReadTimeout(timeout);
             connection.setConnectTimeout(timeout);
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                connection.addRequestProperty(entry.getKey(), entry.getValue());
+                final String asciiKey = httpHeaderEncode(entry.getKey());
+                final String asciiHeader = httpHeaderEncode(entry.getValue());
+                connection.addRequestProperty(asciiKey, asciiHeader);
             }
             if (bearerToken != null) {
                 signWithBearerToken(connection);
@@ -171,12 +172,12 @@ public class JsonObjectRequest<T> {
                     errorResponse = IOUtils.toString(errorStream);
                     try {
                         errorResponse = readModel(gson, (String) errorResponse, classOfError);
-                    } catch (JsonSyntaxException exception) {
+                    } catch (JsonSyntaxException ignored) {
                     }
                 } else {
                     errorResponse = IOUtils.toString(errorStream);
                 }
-                throw new RestException(errorResponse.toString(), new IOException(Messages.exception_rest_http(responseCode, responseMessage)));
+                throw new IOException(errorResponse.toString(), new IOException(Messages.exception_http(responseCode, responseMessage)));
             }
 
             // Download
@@ -184,15 +185,26 @@ public class JsonObjectRequest<T> {
                 inputStream = connection.getInputStream();
                 model = readModel(gson, inputStream, classOfT);
             }
-
-        } catch (IOException e) {
-            throw new RestException(Messages.exception_rest_connection(), e);
         } finally {
             closeQuietly(errorStream);
             closeQuietly(inputStream);
         }
 
         return model;
+    }
+
+    public static String httpHeaderEncode(String text) {
+        StringBuilder sb = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            final char charAt = text.charAt(i);
+            if (charAt >= '\u007f') {
+                sb.append(String.format("\\u%04X", (int) charAt));
+            } else {
+                sb.append(charAt);
+            }
+        }
+
+        return sb.toString();
     }
 
     private void upload(HttpURLConnection connection) throws IOException {

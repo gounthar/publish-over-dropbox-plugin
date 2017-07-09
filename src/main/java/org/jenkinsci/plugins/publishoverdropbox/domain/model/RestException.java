@@ -24,9 +24,7 @@
 
 package org.jenkinsci.plugins.publishoverdropbox.domain.model;
 
-import java.io.IOException;
-
-public class RestException extends IOException {
+public class RestException extends Exception {
     private final Object response;
 
     public RestException() {

@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (C) 2017 by René de Groot
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.jenkinsci.plugins.publishoverdropbox.domain;
 
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +54,7 @@ public class DropboxV2Test {
     private DropboxV2 sut;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, RestException {
         assumeTrue(StringUtils.isNotEmpty(accessToken));
         sut = new DropboxV2(accessToken);
         boolean exists = sut.changeWorkingDirectory("/tests");
@@ -78,7 +101,7 @@ public class DropboxV2Test {
     }
 
     @Test
-    public void testCanConnect() throws IOException {
+    public void testCanConnect() throws IOException, RestException {
         // Act
         sut.connect();
         // Assert
@@ -86,7 +109,7 @@ public class DropboxV2Test {
     }
 
     @Test
-    public void testCanDisconnect() throws IOException {
+    public void testCanDisconnect() throws IOException, RestException {
         // Arrange
         sut.connect();
         // Act
@@ -138,6 +161,24 @@ public class DropboxV2Test {
         Metadata metaData = sut.retrieveMetaData("/tests/simplefile.txt");
         assertThat(metaData.getName(), is("simplefile.txt"));
         assertThat(metaData.getPathLower(), is("/tests/simplefile.txt"));
+        assertThat(metaData.getSize(), is((long) bytes.length));
+    }
+
+    @Test
+    public void testStoreSpecialCharacterFile() throws RestException, UnsupportedEncodingException {
+        // Arrange
+        final String specialName = "simpl\u2202filé.txt";
+        final String specialFolder = "t\u2202sts";
+        sut.makeDirectory(specialFolder);
+        sut.changeWorkingDirectory(specialFolder);
+        final byte[] bytes = "Hello world".getBytes("UTF-8");
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        // Act
+        sut.storeFile(specialName, inputStream, bytes.length);
+        // Assert
+        Metadata metaData = sut.retrieveMetaData("/" + specialFolder + "/" + specialName);
+        assertThat(metaData.getName(), is(specialName));
+        assertThat(metaData.getPathLower(), is("/" + specialFolder + "/" + specialName));
         assertThat(metaData.getSize(), is((long) bytes.length));
     }
 
@@ -232,7 +273,7 @@ public class DropboxV2Test {
     }
 
     @Test(expected = RestException.class)
-    public void testCantConnectWithWrongToken() throws IOException {
+    public void testCantConnectWithWrongToken() throws IOException, RestException {
         // Arrange
         sut = new DropboxV2(wrongAccessToken);
         // Act

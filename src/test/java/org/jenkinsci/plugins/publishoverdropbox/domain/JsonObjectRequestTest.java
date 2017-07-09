@@ -23,29 +23,33 @@
  */
 package org.jenkinsci.plugins.publishoverdropbox.domain;
 
-import org.jenkinsci.plugins.publishoverdropbox.domain.model.FolderMetadata;
-import org.jenkinsci.plugins.publishoverdropbox.domain.model.RestException;
+import org.junit.Test;
 
-import java.io.InputStream;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public interface DropboxAdapter {
-    void setTimeout(int timeout);
+public class JsonObjectRequestTest {
 
-    int getTimeout();
+    @Test
+    public void simpleEncode() throws Exception {
+        // Arrange
+        final String input = "simple";
+        // Execute
+        String encoded = JsonObjectRequest.httpHeaderEncode(input);
+        // Assert
+        assertThat(encoded, is(input));
+    }
 
-    boolean isConnected();
+    @Test
+    public void specialCharEncode() throws Exception {
+        // Arrange
+        final String input = "simple\u2014text";
+        final String output = "simple\\u2014text";
+        // Execute
+        String encoded = JsonObjectRequest.httpHeaderEncode(input);
+        // Assert
+        assertThat(encoded, is(output));
+    }
 
-    boolean connect() throws RestException;
 
-    boolean disconnect();
-
-    FolderMetadata makeDirectory(String path) throws RestException;
-
-    boolean changeWorkingDirectory(String path) throws RestException;
-
-    void storeFile(String name, InputStream content, long length) throws RestException;
-
-    void cleanWorkingFolder() throws RestException;
-
-    void pruneFolder(String path, int pruneRootDays) throws RestException;
 }

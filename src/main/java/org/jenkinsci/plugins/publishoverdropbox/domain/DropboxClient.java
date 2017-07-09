@@ -31,6 +31,7 @@ import jenkins.plugins.publish_over.BapPublisherException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jenkinsci.plugins.publishoverdropbox.domain.model.FolderMetadata;
+import org.jenkinsci.plugins.publishoverdropbox.domain.model.RestException;
 import org.jenkinsci.plugins.publishoverdropbox.impl.DropboxTransfer;
 import org.jenkinsci.plugins.publishoverdropbox.impl.Messages;
 
@@ -57,32 +58,35 @@ public class DropboxClient extends BPDefaultClient<DropboxTransfer> {
         this.buildInfo = buildInfo;
     }
 
-
+    @Override
     public boolean changeDirectory(final String directory) {
         try {
             return dropbox.changeWorkingDirectory(directory);
-        } catch (IOException ioe) {
-            throw new BapPublisherException(Messages.exception_cwdException(directory), ioe);
+        } catch (RestException e) {
+            throw new BapPublisherException(Messages.exception_bap_changeDirectory(e.getMessage()), e);
         }
     }
 
+    @Override
     public boolean makeDirectory(final String path) {
         try {
             FolderMetadata folder = dropbox.makeDirectory(path);
             return folder != null;
-        } catch (IOException ioe) {
-            throw new BapPublisherException(Messages.exception_mkdirException(path), ioe);
+        } catch (RestException e) {
+            throw new BapPublisherException(Messages.exception_bap_makeDirectory(e.getMessage()), e);
         }
     }
 
+    @Override
     public void deleteTree() {
         try {
             dropbox.cleanWorkingFolder();
-        } catch (IOException ioe) {
-            throw new BapPublisherException(Messages.exception_failedToStoreFile("Cleaning failed"), ioe);
+        } catch (RestException e) {
+            throw new BapPublisherException(Messages.exception_bap_deleteTree(e.getMessage()), e);
         }
     }
 
+    @Override
     public void beginTransfers(final DropboxTransfer transfer) {
         if (!transfer.hasConfiguredSourceFiles()) {
             throw new BapPublisherException(Messages.exception_noSourceFiles());
@@ -90,46 +94,43 @@ public class DropboxClient extends BPDefaultClient<DropboxTransfer> {
         if (transfer.isRemoteDirectorySDF() && transfer.isPruneRoot()) {
             try {
                 dropbox.pruneFolder(getAbsoluteRemoteRoot(), transfer.getPruneRootDays());
-            } catch (IOException ioe) {
-                throw new BapPublisherException(Messages.exception_failedToStoreFile("Pruning failed"), ioe);
+            } catch (RestException e) {
+                throw new BapPublisherException(Messages.exception_bap_pruneFolder(e.getMessage()), e);
             }
         }
     }
 
+    @Override
     public void transferFile(final DropboxTransfer transfer, final FilePath filePath, final InputStream content) {
         try {
             dropbox.storeFile(filePath.getName(), content, filePath.length());
-        } catch (IOException ioe) {
-            throw new BapPublisherException(Messages.exception_failedToStoreFile("Storing failed"), ioe);
+        } catch (RestException e) {
+            throw new BapPublisherException(Messages.exception_bap_transferFile(e.getMessage()), e);
+        } catch (IOException e) {
+            throw new BapPublisherException(Messages.exception_bap_transferFile(e.getMessage()), e);
         } catch (InterruptedException e) {
-            throw new BapPublisherException(Messages.exception_failedToStoreFile("Storing failed"), e);
+            throw new BapPublisherException(Messages.exception_bap_transferFile(e.getMessage()), e);
         }
     }
 
     public boolean connect() {
         try {
             return dropbox.isConnected() || dropbox.connect();
-        } catch (IOException ioe) {
-            throw new BapPublisherException(Messages.exception_exceptionOnDisconnect(ioe.getLocalizedMessage()), ioe);
+        } catch (RestException e) {
+            throw new BapPublisherException(Messages.exception_bap_connect(e.getMessage()), e);
         }
     }
 
+    @Override
     public void disconnect() {
         if ((dropbox != null) && dropbox.isConnected()) {
-            try {
-                dropbox.disconnect();
-            } catch (IOException ioe) {
-                throw new BapPublisherException(Messages.exception_exceptionOnDisconnect(ioe.getLocalizedMessage()), ioe);
-            }
+            dropbox.disconnect();
         }
     }
 
+    @Override
     public void disconnectQuietly() {
-        try {
-            disconnect();
-        } catch (Exception e) {
-            LOG.warn(Messages.log_disconnectQuietly(), e);
-        }
+        disconnect();
     }
 
     public void setToken(String token) {

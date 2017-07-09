@@ -26,26 +26,39 @@ package org.jenkinsci.plugins.publishoverdropbox.domain;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FormBuilder {
 
     public static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
-    public static final String AND = "&";
-    public static final String UTF_8 = "UTF-8";
-    public static final String EQUALS = "=";
-    private final StringBuilder query = new StringBuilder();
+    private static final String AND = "&";
+    private static final String UTF_8 = "UTF-8";
+    private static final String EQUALS = "=";
+    private List<String> parameters = new LinkedList<String>();
 
-    public FormBuilder appendQueryParameter(String key, String value) throws UnsupportedEncodingException {
+    public FormBuilder appendQueryParameter(String key, String value) {
+        parameters.add(key);
+        parameters.add(value);
+
+        return this;
+    }
+
+    public String build() throws UnsupportedEncodingException {
+        StringBuilder query = new StringBuilder();
+        for (int i = 0; i < parameters.size(); i = i + 2) {
+            append(query, parameters.get(i), parameters.get(i + 1));
+        }
+
+        return query.toString();
+    }
+
+    private void append(StringBuilder query, String key, String value) throws UnsupportedEncodingException {
         if (query.length() > 0) {
             query.append(AND);
         }
         query.append(URLEncoder.encode(key, UTF_8));
         query.append(EQUALS);
         query.append(URLEncoder.encode(value, UTF_8));
-        return this;
-    }
-
-    public String build() {
-        return query.toString();
     }
 }
