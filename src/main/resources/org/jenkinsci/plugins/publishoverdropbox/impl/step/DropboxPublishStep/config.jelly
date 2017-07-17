@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry title="${%sourceFiles.title}" field="sourceFiles">
+        <f:textbox/>
+    </f:entry>
+
+    <f:entry title="${m.hostconfig()}" field="configName">
+        <select class="setting-input" name="configName">
+            <j:forEach var="s" items="${descriptor.publisherPluginDescriptor.hostConfigurations}">
+                <f:option value="${s.name}"
+                          selected="${s.name==instance.configName or ( instance==null and s.name==defaults.publisher.configName ) }">
+                    ${s.name}
+                </f:option>
+            </j:forEach>
+        </select>
+    </f:entry>
+
+    <f:entry title="${%remoteDirectory.title}" field="remoteDirectory">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%removePrefix.title}" field="removePrefix">
+        <f:textbox/>
+    </f:entry>
+
+    <f:description>
+        <j:out value='${%transfers.envVars(rootURL)}'/>
+    </f:description>
+
+    <f:advanced>
+
+        <j:if test="${descriptor.canUseExcludes()}">
+            <f:entry title="${%excludes.title}" field="excludes">
+                <f:textbox/>
+            </f:entry>
+        </j:if>
+
+        <f:entry title="${%flatten.title}" field="flatten">
+            <f:checkbox/>
+        </f:entry>
+
+        <f:entry title="${%cleanRemote.title}" field="cleanRemote">
+            <f:checkbox/>
+        </f:entry>
+
+        <f:block>
+            <f:optionalBlock title="${%remoteDirectorySDF.title}" field="remoteDirectorySDF" inline="true">
+                <f:optionalBlock title="${%pruneRoot.title}" field="pruneRoot" inline="true">
+                    <f:entry title="${%pruneDays.title}">
+                        <f:textbox default="31" field="pruneRootDays"/>
+                    </f:entry>
+                </f:optionalBlock>
+            </f:optionalBlock>
+        </f:block>
+
+
+    </f:advanced>
+
+</j:jelly>

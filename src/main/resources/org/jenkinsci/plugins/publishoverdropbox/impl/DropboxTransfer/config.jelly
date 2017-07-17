@@ -44,7 +44,7 @@
 
     <f:advanced>
 
-        <j:if test="${descriptor.canUseExcludes()}">
+        <j:if test="${descriptor.canUseExcludes()} ">
             <f:entry title="${%excludes.title}" field="excludes">
                 <f:textbox/>
             </f:entry>

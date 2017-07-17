@@ -32,7 +32,10 @@ import hudson.tasks.Publisher;
 import hudson.util.CopyOnWriteList;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
-import jenkins.plugins.publish_over.*;
+import jenkins.plugins.publish_over.BPBuildInfo;
+import jenkins.plugins.publish_over.BPInstanceConfig;
+import jenkins.plugins.publish_over.BPPlugin;
+import jenkins.plugins.publish_over.JenkinsCapabilities;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.publishoverdropbox.impl.DropboxHostConfiguration;
 import org.jenkinsci.plugins.publishoverdropbox.impl.DropboxPublisherPlugin;
@@ -45,7 +48,7 @@ import java.util.List;
 
 public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publisher> {
 
-    private final CopyOnWriteList<DropboxHostConfiguration> hostConfigurations = new CopyOnWriteList<DropboxHostConfiguration>();
+    private final CopyOnWriteList<DropboxHostConfiguration> hostConfigurations = new CopyOnWriteList<>();
 
     public DropboxPublisherPluginDescriptor() {
         super(DropboxPublisherPlugin.class);
