@@ -2,6 +2,7 @@
 
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
     <f:entry title="${%sourceFiles.title}" field="sourceFiles">
         <f:textbox/>
     </f:entry>
@@ -20,21 +21,12 @@
     <f:entry title="${%remoteDirectory.title}" field="remoteDirectory">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%removePrefix.title}" field="removePrefix">
-        <f:textbox/>
-    </f:entry>
-
-    <f:description>
-        <j:out value='${%transfers.envVars(rootURL)}'/>
-    </f:description>
 
     <f:advanced>
 
-        <j:if test="${descriptor.canUseExcludes()}">
-            <f:entry title="${%excludes.title}" field="excludes">
-                <f:textbox/>
-            </f:entry>
-        </j:if>
+        <f:entry title="${%removePrefix.title}" field="removePrefix">
+            <f:textbox/>
+        </f:entry>
 
         <f:entry title="${%flatten.title}" field="flatten">
             <f:checkbox/>

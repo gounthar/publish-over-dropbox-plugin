@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.publishoverdropbox.impl.step;
 
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -42,7 +43,6 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -60,10 +60,10 @@ public class DropboxPublishStepExecution extends StepExecution implements BPHost
     private transient Run run;
     @StepContextParameter
     private transient FilePath workspace;
-
+    @StepContextParameter
+    private transient EnvVars envVars;
     @Inject
     private transient DropboxPublishStep step;
-
     private transient boolean canceled;
     private transient Throwable cancelCause;
 
@@ -76,13 +76,12 @@ public class DropboxPublishStepExecution extends StepExecution implements BPHost
                 ArrayList<DropboxPublisher> publishers = new ArrayList<>(Arrays.asList(publisher));
                 TaskListener listener = wrap(taskListener);
                 String consolePrefix = Messages.console_message_prefix();
-                TreeMap<String, String> envVars = null; //TODO
                 BPBuildEnv currentBuildEnv = new BPBuildEnv(envVars, workspace, run.getTimestamp());
                 final BPBuildInfo buildInfo = new BPBuildInfo(listener, consolePrefix, Jenkins.getInstance().getRootPath(), currentBuildEnv, null);
 
+                // Reusing the delegate from publish-to base plugin from the pre-step era
                 BPInstanceConfig<DropboxPublisher> delegate = new BPInstanceConfig<>(publishers, false, false, false, null, null);
                 delegate.setHostConfigurationAccess(DropboxPublishStepExecution.this);
-
 
                 try {
                     Result result = delegate.perform(buildInfo);
