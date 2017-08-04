@@ -15,25 +15,9 @@ There are 3 options:
   4. Install the generated publish-over-dropbox.hpi on the advanced section of the plugin manager of your Jenkins installation.
 # Configuration
 
-To publish artifacts to a Dropbox there are three levels of configuration. Each level is dependent on the previous. 
+Plugin documentation is hosted as a page on the Jenkins page:
 
-### Link an account
-
-The highest level is connecting a Dropbox account to Jenkins. Dropbox account connections can be created in the **Jenkins > Credentials**.
-
-<img src="resources/documentation/01-credentials.png"/>
-
-### Create a location
-
-The second level is to create a location for a previously linked account. Locations can be created in **Jenkins > Manage Jenkins > Configure System**.
-
-<img src="resources/documentation/02-location.png"/>
-
-### Publish files
-
-The last level is to actual publish files to a Dropbox location. Publishing can be done as **Post-build Actions** in your build job configuration.
-
-<img src="resources/documentation/03-postbuild.png"/>
+https://wiki.jenkins.io/display/JENKINS/Publish+over+Dropbox+Plugin
 
 # Credits
 
