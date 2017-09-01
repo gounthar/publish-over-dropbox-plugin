@@ -13,7 +13,7 @@ public class SessionFinish {
         @Expose
         private String path;
         @Expose
-        private String mode = "add";
+        private String mode = UploadRequest.WriteMode.OVERWRITE;
         @Expose
         @SerializedName("autorename")
         private boolean autoRename = false;
