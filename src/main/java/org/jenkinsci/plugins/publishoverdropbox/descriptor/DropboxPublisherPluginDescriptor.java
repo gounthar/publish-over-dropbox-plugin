@@ -45,7 +45,6 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.util.List;
 
-
 public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publisher> {
 
     private final CopyOnWriteList<DropboxHostConfiguration> hostConfigurations = new CopyOnWriteList<>();
@@ -56,6 +55,7 @@ public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publis
     }
 
 
+    @Override
     public String getDisplayName() {
         return Messages.descriptor_displayName();
     }
@@ -96,11 +96,11 @@ public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publis
     }
 
     public DropboxPublisherDescriptor getPublisherDescriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(DropboxPublisherDescriptor.class);
+        return Jenkins.getInstance().getDescriptorByType(DropboxPublisherDescriptor.class);
     }
 
     public DropboxHostConfigurationDescriptor getHostConfigurationDescriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(DropboxHostConfigurationDescriptor.class);
+        return Jenkins.getInstance().getDescriptorByType(DropboxHostConfigurationDescriptor.class);
     }
 
     public jenkins.plugins.publish_over.view_defaults.BPInstanceConfig.Messages getCommonFieldNames() {
@@ -129,7 +129,7 @@ public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publis
         return new BPBuildInfo(
                 TaskListener.NULL,
                 "",
-                Jenkins.getActiveInstance().getRootPath(),
+                Jenkins.getInstance().getRootPath(),
                 null,
                 null
         );

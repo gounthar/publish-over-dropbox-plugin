@@ -86,7 +86,6 @@ import java.util.Map;
  *   }}</pre>
  * Both the type field name ({@code "type"}) and the type labels ({@code
  * "Rectangle"}) are configurable.
- * <p>
  * <h3>Registering Types</h3>
  * Create a {@code RuntimeTypeAdapterFactory} by passing the base type and type field
  * name to the {@link #of} factory method. If you don't supply an explicit type
@@ -129,7 +128,7 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
         this.typeFieldName = typeFieldName;
     }
 
-    /**
+    /*
      * Creates a new runtime type adapter using for {@code baseType} using {@code
      * typeFieldName} as the type field name. Type field names are case sensitive.
      */
@@ -137,7 +136,7 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
         return new RuntimeTypeAdapterFactory<T>(baseType, typeFieldName);
     }
 
-    /**
+    /*
      * Creates a new runtime type adapter for {@code baseType} using {@code "type"} as
      * the type field name.
      */
@@ -145,7 +144,7 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
         return new RuntimeTypeAdapterFactory<T>(baseType, "type");
     }
 
-    /**
+    /*
      * Registers {@code type} identified by {@code label}. Labels are case
      * sensitive.
      *
@@ -164,7 +163,7 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
         return this;
     }
 
-    /**
+    /*
      * Registers {@code type} identified by its {@link Class#getSimpleName simple
      * name}. Labels are case sensitive.
      *

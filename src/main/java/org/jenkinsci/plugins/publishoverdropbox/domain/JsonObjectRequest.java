@@ -62,7 +62,7 @@ class JsonObjectRequest<T> {
         JsonObjectRequest<T> request;
 
         public Builder() {
-            request = new JsonObjectRequest();
+            request = new JsonObjectRequest<>();
         }
 
         public Builder<T> url(URL url) {
@@ -244,7 +244,7 @@ class JsonObjectRequest<T> {
         return model;
     }
 
-    private static <MODEL> MODEL readModel(Gson gson, String jsonData, Class<MODEL> classOfModel) throws IOException {
+    private static <MODEL> MODEL readModel(Gson gson, String jsonData, Class<MODEL> classOfModel) {
         MODEL model = null;
         if (jsonData != null) {
             model = gson.fromJson(jsonData, classOfModel);
