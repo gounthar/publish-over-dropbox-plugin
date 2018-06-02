@@ -46,7 +46,7 @@ public class DropboxPublisherLabel extends PublisherLabel implements Describable
     }
 
     public DropboxPublisherLabelDescriptor getDescriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(DropboxPublisherLabelDescriptor.class);
+        return Jenkins.getInstance().getDescriptorByType(DropboxPublisherLabelDescriptor.class);
     }
 
     public boolean equals(final Object that) {
