@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.publishoverdropbox.impl;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.model.Describable;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.plugins.publish_over.BPBuildInfo;
 import jenkins.plugins.publish_over.BPHostConfiguration;
@@ -91,7 +92,7 @@ public class DropboxHostConfiguration extends BPHostConfiguration<DropboxClient,
         if (token == null) {
             throw new BapPublisherException(Messages.exception_bap_createclient("Missing token"));
         }
-        return new DropboxV2(token.getAccessCode());
+        return new DropboxV2(Secret.toString(token.getAccessCode()));
     }
 
 
@@ -105,7 +106,7 @@ public class DropboxHostConfiguration extends BPHostConfiguration<DropboxClient,
 
     private void configureDropboxclient(final DropboxClient client) {
         client.setTimeout(timeout);
-        client.setToken(token.getAuthorizationCode());
+        client.setToken(Secret.toString(token.getAuthorizationCode()));
     }
 
     private void connect(final DropboxClient client) throws IOException {

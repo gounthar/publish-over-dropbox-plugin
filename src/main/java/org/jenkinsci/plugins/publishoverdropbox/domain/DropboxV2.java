@@ -29,6 +29,7 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.publishoverdropbox.DropboxToken;
@@ -581,10 +582,11 @@ public class DropboxV2 implements DropboxAdapter {
 
     private static String readAccessTokenFromProvider(String authorizationCode) {
         String accessToken = null;
-        List<DropboxToken> tokens = CredentialsProvider.lookupCredentials(DropboxToken.class, Jenkins.getActiveInstance(), null, (DomainRequirement) null);
+        List<DropboxToken> tokens = CredentialsProvider.lookupCredentials(DropboxToken.class, Jenkins.getInstance(), null, (DomainRequirement) null);
         for (DropboxToken token : tokens) {
-            if (token.getAuthorizationCode().equals(authorizationCode)) {
-                accessToken = token.getAccessCode();
+            String providerAuthorizationCode = Secret.toString(token.getAuthorizationCode());
+            if (providerAuthorizationCode.equals(authorizationCode)) {
+                accessToken = Secret.toString(token.getAccessCode());
             }
         }
 

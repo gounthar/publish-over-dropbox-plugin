@@ -29,6 +29,7 @@ import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Util;
+import hudson.util.Secret;
 import org.jenkinsci.plugins.publishoverdropbox.impl.Messages;
 
 import javax.annotation.Nonnull;
@@ -37,10 +38,10 @@ import javax.annotation.Nonnull;
 public interface DropboxToken extends StandardCredentials {
 
     @Nonnull
-    String getAuthorizationCode();
+    Secret getAuthorizationCode();
 
     @Nonnull
-    String getAccessCode();
+    Secret getAccessCode();
 
     class NameProvider extends CredentialsNameProvider<DropboxToken> {
 

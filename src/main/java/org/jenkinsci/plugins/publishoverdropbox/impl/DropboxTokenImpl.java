@@ -28,6 +28,7 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.util.Secret;
 import org.jenkinsci.plugins.publishoverdropbox.DropboxToken;
 import org.jenkinsci.plugins.publishoverdropbox.domain.DropboxV2;
 import org.jenkinsci.plugins.publishoverdropbox.domain.model.RestException;
@@ -41,16 +42,16 @@ public class DropboxTokenImpl extends BaseStandardCredentials implements Dropbox
     static final long serialVersionUID = 43L;
 
     @Nonnull
-    private final String authorizationCode;
+    private final Secret authorizationCode;
     @Nonnull
-    private final String accessCode;
+    private final Secret accessCode;
 
     @DataBoundConstructor
     public DropboxTokenImpl(CredentialsScope scope, String id, @Nonnull String authorizationCode, String description) throws IOException {
         super(scope, id, description);
-        this.authorizationCode = authorizationCode;
+        this.authorizationCode = Secret.fromString(authorizationCode);
         try {
-            this.accessCode = DropboxV2.convertAuthorizationToAccessCode(authorizationCode);
+            this.accessCode = Secret.fromString(DropboxV2.convertAuthorizationToAccessCode(authorizationCode));
         } catch (RestException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -58,13 +59,13 @@ public class DropboxTokenImpl extends BaseStandardCredentials implements Dropbox
 
     @NonNull
     @Override
-    public String getAuthorizationCode() {
+    public Secret getAuthorizationCode() {
         return authorizationCode;
     }
 
     @NonNull
     @Override
-    public String getAccessCode() {
+    public Secret getAccessCode() {
         return accessCode;
     }
 
