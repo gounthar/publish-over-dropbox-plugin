@@ -533,16 +533,18 @@ public class DropboxV2 implements DropboxAdapter {
      * Static token helpers
      * */
 
-    public static String convertAuthorizationToAccessCode(String authorizationCode) throws RestException {
+    public static Secret convertAuthorizationToAccessCode(Secret secretAuthorizationCode) throws RestException {
+        String authorizationCode = Secret.toString(secretAuthorizationCode);
         if (StringUtils.isEmpty(authorizationCode)) {
-            return "";
+            return Secret.fromString(null);
         }
+
         String accessToken = readAccessTokenFromProvider(authorizationCode);
         if (accessToken == null) {
             accessToken = readAccessTokenFromWeb(authorizationCode);
         }
 
-        return accessToken;
+        return Secret.fromString(accessToken);
     }
 
     private static String readAccessTokenFromWeb(String authorizationCode) throws RestException {
