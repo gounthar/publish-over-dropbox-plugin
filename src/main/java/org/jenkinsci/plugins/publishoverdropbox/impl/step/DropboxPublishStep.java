@@ -157,7 +157,7 @@ public class DropboxPublishStep extends AbstractStepImpl {
 
 
         public DropboxPublisherPlugin.Descriptor getPublisherPluginDescriptor() {
-            return Jenkins.getInstance().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
+            return Jenkins.get().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
         }
     }
 

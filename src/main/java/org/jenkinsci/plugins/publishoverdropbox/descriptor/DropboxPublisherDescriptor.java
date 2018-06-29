@@ -44,11 +44,11 @@ public class DropboxPublisherDescriptor extends Descriptor<DropboxPublisher> {
     }
 
     public DropboxPublisherPlugin.Descriptor getPublisherPluginDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
+        return Jenkins.get().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
     }
 
     public DropboxTransferDescriptor getTransferDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(DropboxTransferDescriptor.class);
+        return Jenkins.get().getDescriptorByType(DropboxTransferDescriptor.class);
     }
 
     public jenkins.plugins.publish_over.view_defaults.BapPublisher.Messages getCommonFieldNames() {

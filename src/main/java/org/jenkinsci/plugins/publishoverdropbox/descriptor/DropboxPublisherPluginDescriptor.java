@@ -96,11 +96,11 @@ public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publis
     }
 
     public DropboxPublisherDescriptor getPublisherDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(DropboxPublisherDescriptor.class);
+        return Jenkins.get().getDescriptorByType(DropboxPublisherDescriptor.class);
     }
 
     public DropboxHostConfigurationDescriptor getHostConfigurationDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(DropboxHostConfigurationDescriptor.class);
+        return Jenkins.get().getDescriptorByType(DropboxHostConfigurationDescriptor.class);
     }
 
     public jenkins.plugins.publish_over.view_defaults.BPInstanceConfig.Messages getCommonFieldNames() {
@@ -129,7 +129,7 @@ public class DropboxPublisherPluginDescriptor extends BuildStepDescriptor<Publis
         return new BPBuildInfo(
                 TaskListener.NULL,
                 "",
-                Jenkins.getInstance().getRootPath(),
+                Jenkins.get().getRootPath(),
                 null,
                 null
         );

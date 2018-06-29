@@ -108,13 +108,13 @@ public class DropboxHostConfiguration extends BPHostConfiguration<DropboxClient,
         client.setToken(token.getAuthorizationCode());
     }
 
-    private void connect(final DropboxClient client) throws IOException {
+    private void connect(final DropboxClient client) {
         if (!client.connect()) {
             exception(client, Messages.exception_bap_logInFailed(getToken()));
         }
     }
 
-    private void setRootDirectoryInClient(final DropboxClient client) throws IOException {
+    private void setRootDirectoryInClient(final DropboxClient client) {
         if (isDirectoryAbsolute(getRemoteRootDir())) {
             client.setAbsoluteRemoteRoot(getRemoteRootDir());
         }

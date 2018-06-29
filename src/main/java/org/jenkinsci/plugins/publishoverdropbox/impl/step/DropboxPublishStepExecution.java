@@ -77,7 +77,7 @@ public class DropboxPublishStepExecution extends StepExecution implements BPHost
                 TaskListener listener = wrap(taskListener);
                 String consolePrefix = Messages.console_message_prefix();
                 BPBuildEnv currentBuildEnv = new BPBuildEnv(envVars, workspace, run.getTimestamp());
-                final BPBuildInfo buildInfo = new BPBuildInfo(listener, consolePrefix, Jenkins.getInstance().getRootPath(), currentBuildEnv, null);
+                final BPBuildInfo buildInfo = new BPBuildInfo(listener, consolePrefix, Jenkins.get().getRootPath(), currentBuildEnv, null);
 
                 // Reusing the delegate from publish-to base plugin from the pre-step era
                 BPInstanceConfig<DropboxPublisher> delegate = new BPInstanceConfig<>(publishers, false, false, false, null, null);
@@ -131,7 +131,7 @@ public class DropboxPublishStepExecution extends StepExecution implements BPHost
 
     @Override
     public BPHostConfiguration<DropboxClient, Object> getConfiguration(String name) {
-        final DropboxPublisherPlugin.Descriptor pluginDescriptor = Jenkins.getInstance().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
+        final DropboxPublisherPlugin.Descriptor pluginDescriptor = Jenkins.get().getDescriptorByType(DropboxPublisherPlugin.Descriptor.class);
         return pluginDescriptor.getConfiguration(step.getConfigName());
     }
 }

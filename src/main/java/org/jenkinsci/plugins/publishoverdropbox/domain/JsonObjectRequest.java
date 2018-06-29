@@ -27,14 +27,12 @@ package org.jenkinsci.plugins.publishoverdropbox.domain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import hudson.ProxyConfiguration;
-import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.publishoverdropbox.impl.Messages;
 
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -197,20 +195,8 @@ class JsonObjectRequest<T> {
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {
-        Proxy proxy = getProxy(url);
-        if (proxy != null) {
-            return (HttpURLConnection) url.openConnection(proxy);
-        } else {
-            return (HttpURLConnection) url.openConnection();
-        }
-    }
+        return (HttpURLConnection) ProxyConfiguration.open(url);
 
-    private Proxy getProxy(URL url) {
-        ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
-        if (proxyConfig != null) {
-            return proxyConfig.createProxy(url.getHost());
-        }
-        return null;
     }
 
     public static String httpHeaderEncode(String text) {

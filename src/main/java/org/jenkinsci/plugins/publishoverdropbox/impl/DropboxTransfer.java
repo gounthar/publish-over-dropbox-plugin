@@ -36,7 +36,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class DropboxTransfer extends BPTransfer implements Describable<DropboxTransfer> {
 
-
     private static final long serialVersionUID = 1L;
     private final boolean pruneRoot;
     private final int pruneRootDays;
@@ -62,7 +61,7 @@ public class DropboxTransfer extends BPTransfer implements Describable<DropboxTr
     }
 
     public DropboxTransferDescriptor getDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(DropboxTransferDescriptor.class);
+        return Jenkins.get().getDescriptorByType(DropboxTransferDescriptor.class);
     }
 
     protected ToStringBuilder addToToString(final ToStringBuilder builder) {
