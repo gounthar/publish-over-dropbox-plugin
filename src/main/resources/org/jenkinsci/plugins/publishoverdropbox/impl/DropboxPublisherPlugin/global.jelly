@@ -23,7 +23,7 @@
   ~ THE SOFTWARE.
   -->
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form" xmlns:pod="/lib/publishoverdropbox">
 
     <j:set var="m" value="${descriptor.commonManageMessages}"/>
 
@@ -32,14 +32,14 @@
             <j:scope>
                 <j:set var="descriptor" value="${descriptor.hostConfigurationDescriptor}"/>
                 <f:repeatable var="instance" items="${instance.hostConfigurations}" header="${%hostconfig.dragAndDrop}">
-                    <table width="100%">
+                    <pod:blockWrapper>
                         <st:include page="config.jelly" class="${descriptor.clazz}"/>
                         <f:entry title="">
                             <div align="right">
                                 <f:repeatableDeleteButton/>
                             </div>
                         </f:entry>
-                    </table>
+                    </pod:blockWrapper>
                 </f:repeatable>
             </j:scope>
         </f:entry>
