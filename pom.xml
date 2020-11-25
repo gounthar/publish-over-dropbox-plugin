@@ -16,17 +16,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.2</version>
+        <version>4.13</version>
         <relativePath />
     </parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>publish-over-dropbox</artifactId>
     <version>1.2.6-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>Publish Over Dropbox</name>
     <description>Send build artifacts to Dropbox account</description>
-    <url>https://wiki.jenkins.io/display/JENKINS/Publish+over+Dropbox+Plugin</url>
+    <url>https://github.com/jenkinsci/publish-over-dropbox-plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -44,8 +43,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     </developers>
 
     <properties>
-        <jenkins.version>2.98</jenkins.version>
-        <java.level>7</java.level>
+        <jenkins.version>2.204.6</jenkins.version>
+        <java.level>8</java.level>
     </properties>
 
     <!-- Assuming you want to host on @jenkinsci: -->
@@ -61,10 +60,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
-        <repository>
-            <id>uk.maven.org</id>
-            <url>http://uk.maven.org/maven2</url>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -77,12 +72,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>publish-over</artifactId>
-            <version>0.21</version>
+            <version>0.22</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>1.21</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -92,8 +86,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>1.14</version>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.204.x</artifactId>
+                <version>18</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
