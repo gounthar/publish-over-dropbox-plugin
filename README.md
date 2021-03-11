@@ -167,7 +167,7 @@ prefix.
 
 # Changelog
 
-Link to changelog [here](resources/documentation/changelog.md)
+Link to changelog [here](./resources/documentation/CHANGELOG.md)
 
 # Credits
 
