@@ -13,11 +13,161 @@ There are 3 options:
   2. Clone the sources and update the Config.java with your personal client id and client secret.
   3. Run the "mvn hpi:hpi" on the project source code
   4. Install the generated publish-over-dropbox.hpi on the advanced section of the plugin manager of your Jenkins installation.
+
+# News
+
+### Pipeline support
+
+Version 1.2.0 of the Dropbox plugin is out. It is now possible to use
+the new Jenkins pipeline DSL to configure the Publish over Dropbox
+plugin.
+
+More info on: [Build pipelines](https://jenkins.io/doc/book/pipeline/)
+
+### EOL version 1.0.0 - 1.0.5
+
+The versions of the plugin before 1.1 use the Dropbox V1 API. These are
+[deprecated by
+Dropbox](https://blogs.dropbox.com/developers/2016/06/api-v1-deprecated/)
+will stop working from June 28, 2017.
+
+-   Update your plugin to at least 1.1.2
+
+### Deprecated 1.0.0 - 1.0.5 OAuth API token
+
+The versions before 1.1 use a API token coupled to a business account.
+That account might not exist in the future, which can block all derived
+Tokens. Uploads will fail after that.
+
+1.  Update your plugin to at least 1.1.2
+2.  Generate a new Token. You can by retaking the first configuration
+    step: Link an account. (as described below)
+
 # Configuration
 
-Plugin documentation is hosted as a page on the Jenkins page:
+### Link an account
 
-https://wiki.jenkins.io/display/JENKINS/Publish+over+Dropbox+Plugin
+The highest level is connecting a Dropbox account to Jenkins. Dropbox
+account connections can be created in the \***Jenkins \>
+Credentials**\*.
+
+![](resources/documentation/01-credentials.png)
+
+### Create a location
+
+The second level is to create a location for a previously linked
+account. Locations can be created in \***Jenkins \> Manage Jenkins \>
+Configure System**\*.
+
+![](resources/documentation/02-location.png)
+
+### Publish files - classic style
+
+The last level is to actual publish files to a Dropbox location.
+Publishing can be done as \***Post-build Actions**\* in your build job
+configuration.
+
+![](resources/documentation/03-postbuild.png)
+
+### Publish files - pipeline style
+
+The last level is to actual publish files to a Dropbox location. Since
+version 1.2.0 publishing can be configured with **Pipeline DSL** in your
+build job configuration.
+
+Using the Snippet Generator you can create code for the DSL publishing.
+A simple step only provides the required parameters: `configName`,
+`sourceFiles` and `remoteDirectory`,
+
+![](resources/documentation/simple_example.png)
+
+All the options available in the classic mode are also available in the
+DSL syntax.
+
+![](resources/documentation/complex_example.png)
+
+A description of all the parameters are:
+
+#### sourceFiles (required)
+
+Files to upload to the Dropbox location.
+
+The string is a comma separated list of includes for an Ant fileset eg.
+'\*\*/\*.zip' (see
+[patterns](http://ant.apache.org/manual/dirtasks.html#patterns) in the
+Ant manual). The base directory for this fileset is the workspace.
+
+#### configName (required)
+
+Select an Dropbox location from the list configured in the global
+configuration of this Jenkins. The configuration defines the account
+properties and base directory of the Dropbox location.
+
+#### remoteDirectory (required)
+
+Destination folder.
+
+This folder will be below the one in the global configuration. The
+folder will be created if does not exist.
+
+#### flatten (optional)
+
+Only create files on the server, do not create directories (except for
+the remote directory).
+
+All files that have been selected to transfer must have unique
+filenames. Publishing will stop and fail as soon as a duplicate filename
+is found when using the flatten option.
+
+#### remoteDirectorySDF (optional)
+
+Select this to include the timestamp in the remote directory.
+
+The timestamp is the date of build. This setting turns the remote
+directory option into a java SimpleDateFormat. The SimpleDateFormat(SDF)
+uses letters to represent components of the date, like the month, year,
+or day of the week.
+The [SimpleDateFormat](http://download.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html)
+page has more information about the date patterns. As the SDF reserves
+all of the letters \[A-Z\]\[a-z\], any that you want to appear literally
+in the directory that is created will need to be quoted.
+
+#### cleanRemote (optional)
+
+Select to delete all files and directories within the remote directory
+before transferring files.
+
+#### pruneRoot (optional)
+
+Directories older then the max days will be deleted.
+
+A date format directory format can lead to a long list of directories.
+Removing old directories in the remote root will allow you to prune that
+list.
+
+#### pruneDays (required only with pruneRoot enabled)
+
+Directory created more then this number of days ago are considered old
+for pruning of root.
+
+#### removePrefix (optional)
+
+First part of the file path that should not be created on the remote
+server.
+
+Directory structures are created relative to the base directory, which
+is usually the workspace.You normally do not want the full path to these
+files to be created on the server. For example if Source files were
+`target/deployment/images/**/` then you may want Remove prefix to be
+`target/deployment` This would create the images folder under the remote
+directory, and not target/deployment
+
+If you use remove prefix, then ALL source file paths MUST start with the
+prefix.
+
+# Changelog
+
+Link to changelog [here](resources/documentation/changelog.md)
 
 # Credits
 
