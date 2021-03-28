@@ -1,5 +1,7 @@
 # Changelog
 
+See Github releases for newer release info.
+
 ### 1.2.4 (June 2018)
 
 -   Fix proxy config related crash on remote instances  
